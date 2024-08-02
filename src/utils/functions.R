@@ -37,12 +37,14 @@ linear_weight <- function(
 				SELECT
 					grid.{grid_loop_fld}
 				FROM
-					{grid_tbl} grid
+					(select * FROM {grid_tbl} grd JOIN (select * from whse_sp.tsa_boundaries_2020 where tsa IN (11)) tsa ON ST_Intersects(grd.geom, tsa.geom)) grid
 				LEFT JOIN
 					{dst_schema}.{dst_tbl}_status status
 				USING ({grid_loop_fld})
-					WHERE status.{grid_loop_fld} is null;
+					WHERE status.{grid_loop_fld} is null
+				GROUP BY grid.{grid_loop_fld};
 				")
+	print(query)
 	run_sql_r(query, pg_conn_param)
 
 
@@ -93,6 +95,8 @@ linear_weight <- function(
 		print(glue("On map tile: {grid_row}, {i}/{all_rows}, {format(iteration_start_time, '%Y-%m-%d %I:%M:%S %p')}"))
 
 		tryCatch({
+			print(glue(spatial_query))
+			browser()
 			vect <- st_cast(st_read(conn, query = glue(spatial_query), crs = 3005), "MULTIPOLYGON")
 		}, error = function(e){
 			## in the case of an error - wrap a buffer within 0.0001 width to 'fix'

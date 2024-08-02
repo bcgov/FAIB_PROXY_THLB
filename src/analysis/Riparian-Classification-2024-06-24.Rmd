@@ -1944,11 +1944,11 @@ query <- "ALTER TABLE whse_sp.fwa_lakes_poly ADD COLUMN riparian_buffer_width_m 
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_lakes_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'L1A' THEN 0
-	WHEN riparian_class = 'L1B' THEN 10
-	WHEN riparian_class = 'L2'  THEN 15
-	WHEN riparian_class = 'L3'  THEN 7.5
-	WHEN riparian_class = 'L4'  THEN 7.5
+	WHEN riparian_class = 'L1A' THEN 0  -- 105 -- 0
+	WHEN riparian_class = 'L1B' THEN 10 -- 105 -- 10
+	WHEN riparian_class = 'L2'  THEN 10 -- 55 -- 15
+	WHEN riparian_class = 'L3'  THEN 0  -- 55 -- 7.5
+	WHEN riparian_class = 'L4'  THEN 0  -- 55 - 7.5
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_lakes_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -1975,13 +1975,13 @@ query <- "ALTER TABLE whse_sp.fwa_rivers_poly ADD COLUMN riparian_buffer_width_m
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_rivers_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'S1A' THEN 50
-	WHEN riparian_class = 'S1B' THEN 60
-	WHEN riparian_class = 'S2'  THEN 40
-	WHEN riparian_class = 'S3'  THEN 30
-	WHEN riparian_class = 'S4'  THEN 7.5
-	WHEN riparian_class = 'S5'  THEN 7.5
-	WHEN riparian_class = 'S6'  THEN 1
+	WHEN riparian_class = 'S1A' THEN 55 -- 50
+	WHEN riparian_class = 'S1B' THEN 55 -- 60
+	WHEN riparian_class = 'S2'  THEN 35 -- 40
+	WHEN riparian_class = 'S3'  THEN 25 -- 30
+	WHEN riparian_class = 'S4'  THEN 4 -- 30 -- 7.5
+	WHEN riparian_class = 'S5'  THEN 4 -- 30 -- 7.5
+	WHEN riparian_class = 'S6'  THEN 0 -- 30 -- 1
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_rivers_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -2008,11 +2008,11 @@ query <- "ALTER TABLE whse_sp.fwa_wetlands_poly ADD COLUMN riparian_buffer_width
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_wetlands_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'W1'  THEN 20
-	WHEN riparian_class = 'W2'  THEN 15
-	WHEN riparian_class = 'W3'  THEN 7.5
-	WHEN riparian_class = 'W4'  THEN 7.5
-	WHEN riparian_class = 'W5'  THEN 20
+	WHEN riparian_class = 'W1'  THEN 15 -- 55 -- 20
+	WHEN riparian_class = 'W2'  THEN 12 -- 55 -- 15
+	WHEN riparian_class = 'W3'  THEN 3 -- 55 -- 7.5
+	WHEN riparian_class = 'W4'  THEN 3 -- 30 -- 7.5
+	WHEN riparian_class = 'W5'  THEN 15 -- 55 -- 20
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_wetlands_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -2027,8 +2027,6 @@ run_sql_r(query, conn_list)
 query <- "ANALYZE whse_sp.fwa_wetlands_poly;"
 run_sql_r(query, conn_list)
 
-
-
 ## stream network
 query <- "ALTER TABLE whse_sp.modelled_habitat_potential DROP COLUMN IF EXISTS riparian_buffer_geom;"
 run_sql_r(query, conn_list)
@@ -2040,16 +2038,17 @@ run_sql_r(query, conn_list)
 query <- "ALTER TABLE whse_sp.modelled_habitat_potential ADD COLUMN riparian_buffer_width_m smallint;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'S1A' THEN 50
-	WHEN riparian_class = 'S1B' THEN 60
-	WHEN riparian_class = 'S2'  THEN 40
-	WHEN riparian_class = 'S3'  THEN 30
-	WHEN riparian_class = 'S4'  THEN 7.5
-	WHEN riparian_class = 'S5'  THEN 7.5
-	WHEN riparian_class = 'S6'  THEN 1
-	END;"
+	WHEN riparian_class = 'S1A' THEN 55 -- 50
+	WHEN riparian_class = 'S1B' THEN 55 -- 60
+	WHEN riparian_class = 'S2'  THEN 35 -- 40
+	WHEN riparian_class = 'S3'  THEN 25 -- 30
+	WHEN riparian_class = 'S4'  THEN 4 -- 30 -- 7.5
+	WHEN riparian_class = 'S5'  THEN 4 -- 30 -- 7.5
+	WHEN riparian_class = 'S6'  THEN 0 -- 30 -- 1
+	END
+	WHERE tsa = 11;"
 run_sql_r(query, conn_list)
-query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m) WHERE riparian_buffer_width_m IS NOT NULL;"
+query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m) WHERE riparian_buffer_width_m IS NOT NULL and tsa = 11;"
 run_sql_r(query, conn_list)
 
 query <- "CREATE INDEX IF NOT EXISTS modelled_habitat_potential_buffer_idx
@@ -2069,16 +2068,23 @@ grid_table <- "whse_sp.nts_50k_grid"
 grid_loop_fld <- "map_tile"
 grid_geom_fld <- "geom"
 
-query <- glue("CREATE TABLE whse_sp.riparian_buffers (
+query <- glue("CREATE TABLE whse_sp.riparian_buffers_kamloops (
   {grid_loop_fld} varchar,
   geom geometry(MultiPolygon, 3005)
 );")
 run_sql_r(query, conn_list)
 
-query <- glue("SELECT {grid_loop_fld} FROM {grid_table}")
+
+query <- "select 
+grd.map_tile
+from 
+whse_sp.nts_50k_grid grd
+join 
+(select * from whse_sp.tsa_boundaries_2020 where tsa IN (11)) tsa -- (23, 11, 22, 18)
+ON ST_Intersects(grd.geom, tsa.geom)"
 grid_df <- sql_to_df(query, conn_list)
 
-query <- "INSERT INTO whse_sp.riparian_buffers ({grid_loop_fld}, geom)
+query <- "INSERT INTO whse_sp.riparian_buffers_kamloops ({grid_loop_fld}, geom)
 WITH all_buffers_appended AS (
   -- streams
   SELECT 
@@ -2170,16 +2176,16 @@ GROUP BY
 Write out streams, wetlands and lakes to a FileGDB
 ```{r eval = FALSE}
 ## rivers
-system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_rivers_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_rivers_poly WHERE riparian_class IS NOT NULL\"")
+system("ogr2ogr -overwrite -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian_classes_tsa_23_22_18_11.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_rivers_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, riv.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_rivers_poly riv JOIN (select ST_Union(geom) as geom from whse_sp.tsa_boundaries_2020 where tsa IN (23, 22, 18, 11)) tsa ON ST_Intersects(tsa.geom, riv.geom) WHERE riparian_class IS NOT NULL\"")
 
 ## lakes
-system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_lakes_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_lakes_poly WHERE riparian_class IS NOT NULL\" -update")
+system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian_classes_tsa_23_22_18_11.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_lakes_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, lake.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_lakes_poly lake JOIN (select ST_Union(geom) as geom from whse_sp.tsa_boundaries_2020 where tsa IN (23, 22, 18, 11)) tsa ON ST_Intersects(tsa.geom, lake.geom) WHERE riparian_class IS NOT NULL\" -update")
 
 ## wetlands
-system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_wetlands_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_wetlands_poly WHERE riparian_class IS NOT NULL\" -update")
+system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian_classes_tsa_23_22_18_11.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTIPOLYGON -nln fwa_wetlands_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, wet.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_sp.fwa_wetlands_poly wet JOIN (select ST_Union(geom) as geom from whse_sp.tsa_boundaries_2020 where tsa IN (23, 22, 18, 11)) tsa ON ST_Intersects(tsa.geom, wet.geom) WHERE riparian_class IS NOT NULL\" -update")
 
 ## streams
-system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTILINESTRING -nln fwa_stream_networks_sp_modelled_habitat_potential -sql \"SELECT fid, linear_feature_id::int, fish_habitat_id, blue_line_key, watershed_key, gnis_name, fwa_watershed_code, watershed_group_code, downstream_route_measure, waterbody_key, fwa_fcode_label, observation_id, gradient_barrier_030_id,gradient_barrier_050_id,gradient_barrier_080_id,gradient_barrier_150_id,gradient_barrier_220_id,gradient_barrier_300_id,intermittent_id,fish_obstacle_point_id,obstruction_id,subsurfaceflow_id,fish_habitat,slope,slope_class,stream_order,stream_magnitude,geom,channel_width,channel_width_source,community_watershed,riparian_class,riparian_class_reason,riparian_data_source FROM whse_sp.modelled_habitat_potential WHERE NOT inside_fwa_polygon AND riparian_class IS NOT NULL\" -update")
+system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian_classes_tsa_23_22_18_11.gdb PG:\"dbname='prov_data' host='localhost' user='postgres'\" -nlt MULTILINESTRING -nln fwa_stream_networks_sp_modelled_habitat_potential -sql \"SELECT fid, linear_feature_id::int, fish_habitat_id, blue_line_key, watershed_key, gnis_name, fwa_watershed_code, watershed_group_code, downstream_route_measure, waterbody_key, fwa_fcode_label, observation_id, gradient_barrier_030_id,gradient_barrier_050_id,gradient_barrier_080_id,gradient_barrier_150_id,gradient_barrier_220_id,gradient_barrier_300_id,intermittent_id,fish_obstacle_point_id,obstruction_id,subsurfaceflow_id,fish_habitat,slope,slope_class,stream_order,stream_magnitude,stream.geom,channel_width,channel_width_source,community_watershed,riparian_class,riparian_class_reason,riparian_data_source FROM whse_sp.modelled_habitat_potential stream JOIN (select ST_Union(geom) as geom from whse_sp.tsa_boundaries_2020 where tsa IN (23, 22, 18, 11)) tsa ON ST_Intersects(tsa.geom, stream.geom) WHERE NOT inside_fwa_polygon AND riparian_class IS NOT NULL\" -update")
 
 ```
 </details>
@@ -2192,24 +2198,25 @@ system("ogr2ogr -f \"FileGDB\" C:\\projects\\THLB_Proxy\\data\\output\\riparian.
 source('src/utils/functions.R')
 
 grid_loop_fld <- "map_tile"
+grid_table <- "whse_sp.nts_50k_grid"
 
-spatial_query <- "SELECT
-	geom
-FROM
-	whse_sp.riparian_buffers vect
-WHERE
-	{grid_loop_fld} = '{grid_row}'"
+spatial_query <- "SELECT 
+    ST_Intersection(grd.geom, buf.geom) as
+  	FROM 
+    public.kamloops_fdp_diff_11 buf
+	CROSS JOIN 
+	(SELECT * FROM {grid_table} WHERE {grid_loop_fld} = '{grid_row}') grd"
 
-spatial_query_when_error <- "SELECT
-	geom
-FROM
-	whse_sp.riparian_buffers vect
-WHERE
-	{grid_loop_fld} = '{grid_row}'"
+spatial_query_when_error <- "SELECT 
+    ST_Intersection(grd.geom, buf.geom) as
+  	FROM 
+    public.kamloops_fdp_diff_11 buf
+	CROSS JOIN 
+	(SELECT * FROM {grid_table} WHERE {grid_loop_fld} = '{grid_row}') grd"
 
 tbl_comment <- "COMMENT ON TABLE {dst_schema}.{dst_tbl} IS 'Table created at {today_date}.
 Table contains the gr_skey pixel percent coverage by the following layers:
-Layer: whse_sp.riparian_buffers
+Layer: whse_sp.kamloops_fdp_diff_11
 Buffer: riparian_buffer_width_m'"
 
 linear_weight(template_tif           = "data\\input\\bc_01ha_gr_skey.tif",  ## "S:\\FOR\\VIC\\HTS\\ANA\\workarea\\PROVINCIAL\\bc_01ha_gr_skey.tif"
@@ -2219,7 +2226,7 @@ linear_weight(template_tif           = "data\\input\\bc_01ha_gr_skey.tif",  ## "
 			grid_loop_fld            = "map_tile",
 			grid_geom_fld            = "geom",
 			dst_schema               = "whse",
-			dst_tbl                  = "bc_riparian_buffers",
+			dst_tbl                  = "bc_riparian_buffers_remaining_bw_fdp_and_kamloops",
 			pg_conn_param            = pg_conn_param,
 			create_vector_lyr        = TRUE,
 			spatial_query            = spatial_query,
