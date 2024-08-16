@@ -1944,11 +1944,11 @@ query <- "ALTER TABLE whse_sp.fwa_lakes_poly ADD COLUMN riparian_buffer_width_m 
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_lakes_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'L1A' THEN 0  -- 105 -- 0
-	WHEN riparian_class = 'L1B' THEN 10 -- 105 -- 10
-	WHEN riparian_class = 'L2'  THEN 10 -- 55 -- 15
-	WHEN riparian_class = 'L3'  THEN 0  -- 55 -- 7.5
-	WHEN riparian_class = 'L4'  THEN 0  -- 55 - 7.5
+	WHEN riparian_class = 'L1A' THEN 105 -- 0
+	WHEN riparian_class = 'L1B' THEN 105 -- 10
+	WHEN riparian_class = 'L2'  THEN 55 -- 15
+	WHEN riparian_class = 'L3'  THEN 55 -- 7.5
+	WHEN riparian_class = 'L4'  THEN 55 - 7.5
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_lakes_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -1975,13 +1975,13 @@ query <- "ALTER TABLE whse_sp.fwa_rivers_poly ADD COLUMN riparian_buffer_width_m
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_rivers_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'S1A' THEN 55 -- 50
-	WHEN riparian_class = 'S1B' THEN 55 -- 60
-	WHEN riparian_class = 'S2'  THEN 35 -- 40
-	WHEN riparian_class = 'S3'  THEN 25 -- 30
-	WHEN riparian_class = 'S4'  THEN 4 -- 30 -- 7.5
-	WHEN riparian_class = 'S5'  THEN 4 -- 30 -- 7.5
-	WHEN riparian_class = 'S6'  THEN 0 -- 30 -- 1
+	WHEN riparian_class = 'S1A' THEN 50
+	WHEN riparian_class = 'S1B' THEN 60
+	WHEN riparian_class = 'S2'  THEN 40
+	WHEN riparian_class = 'S3'  THEN 35
+	WHEN riparian_class = 'S4'  THEN 30 -- 7.5
+	WHEN riparian_class = 'S5'  THEN 30 -- 7.5
+	WHEN riparian_class = 'S6'  THEN 30 -- 1
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_rivers_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -2008,11 +2008,11 @@ query <- "ALTER TABLE whse_sp.fwa_wetlands_poly ADD COLUMN riparian_buffer_width
 run_sql_r(query, conn_list)
 
 query <- "UPDATE whse_sp.fwa_wetlands_poly SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'W1'  THEN 15 -- 55 -- 20
-	WHEN riparian_class = 'W2'  THEN 12 -- 55 -- 15
-	WHEN riparian_class = 'W3'  THEN 3 -- 55 -- 7.5
-	WHEN riparian_class = 'W4'  THEN 3 -- 30 -- 7.5
-	WHEN riparian_class = 'W5'  THEN 15 -- 55 -- 20
+	WHEN riparian_class = 'W1'  THEN 55 -- 20
+	WHEN riparian_class = 'W2'  THEN 55 -- 15
+	WHEN riparian_class = 'W3'  THEN 55 -- 7.5
+	WHEN riparian_class = 'W4'  THEN 30 -- 7.5
+	WHEN riparian_class = 'W5'  THEN 55 -- 20
 	END;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.fwa_wetlands_poly SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m);"
@@ -2038,17 +2038,16 @@ run_sql_r(query, conn_list)
 query <- "ALTER TABLE whse_sp.modelled_habitat_potential ADD COLUMN riparian_buffer_width_m smallint;"
 run_sql_r(query, conn_list)
 query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_width_m = CASE 
-	WHEN riparian_class = 'S1A' THEN 55 -- 50
-	WHEN riparian_class = 'S1B' THEN 55 -- 60
-	WHEN riparian_class = 'S2'  THEN 35 -- 40
-	WHEN riparian_class = 'S3'  THEN 25 -- 30
-	WHEN riparian_class = 'S4'  THEN 4 -- 30 -- 7.5
-	WHEN riparian_class = 'S5'  THEN 4 -- 30 -- 7.5
-	WHEN riparian_class = 'S6'  THEN 0 -- 30 -- 1
-	END
-	WHERE tsa = 11;"
+	WHEN riparian_class = 'S1A' THEN 50
+	WHEN riparian_class = 'S1B' THEN 60
+	WHEN riparian_class = 'S2'  THEN 40
+	WHEN riparian_class = 'S3'  THEN 35
+	WHEN riparian_class = 'S4'  THEN 30 -- 7.5
+	WHEN riparian_class = 'S5'  THEN 30 -- 7.5
+	WHEN riparian_class = 'S6'  THEN 30 -- 1
+	END;"
 run_sql_r(query, conn_list)
-query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m) WHERE riparian_buffer_width_m IS NOT NULL and tsa = 11;"
+query <- "UPDATE whse_sp.modelled_habitat_potential SET riparian_buffer_geom = ST_Buffer(geom, riparian_buffer_width_m) WHERE riparian_buffer_width_m IS NOT NULL and tsa = 22;"
 run_sql_r(query, conn_list)
 
 query <- "CREATE INDEX IF NOT EXISTS modelled_habitat_potential_buffer_idx
@@ -2068,7 +2067,7 @@ grid_table <- "whse_sp.nts_50k_grid"
 grid_loop_fld <- "map_tile"
 grid_geom_fld <- "geom"
 
-query <- glue("CREATE TABLE whse_sp.riparian_buffers_kamloops (
+query <- glue("CREATE TABLE whse_sp.riparian_buffers_okanagan (
   {grid_loop_fld} varchar,
   geom geometry(MultiPolygon, 3005)
 );")
@@ -2080,11 +2079,11 @@ grd.map_tile
 from 
 whse_sp.nts_50k_grid grd
 join 
-(select * from whse_sp.tsa_boundaries_2020 where tsa IN (11)) tsa -- (23, 11, 22, 18)
+(select * from whse_sp.tsa_boundaries_2020 where tsa IN (22)) tsa -- (23, 11, 22, 18)
 ON ST_Intersects(grd.geom, tsa.geom)"
 grid_df <- sql_to_df(query, conn_list)
 
-query <- "INSERT INTO whse_sp.riparian_buffers_kamloops ({grid_loop_fld}, geom)
+query <- "INSERT INTO whse_sp.riparian_buffers_okanagan ({grid_loop_fld}, geom)
 WITH all_buffers_appended AS (
   -- streams
   SELECT 

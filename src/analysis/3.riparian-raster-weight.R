@@ -10,11 +10,11 @@ linear_weight <- function(
                                template_tif     = "data\\input\\bc_01ha_gr_skey.tif",  ## "S:\\FOR\\VIC\\HTS\\ANA\\workarea\\PROVINCIAL\\bc_01ha_gr_skey.tif"
                                mask_tif         = "data\\input\\BC_Boundary_Terrestrial.tif", ## 'S:\\FOR\\VIC\\HTS\\ANA\\workarea\\PROVINCIAL\\BC_Boundary_Terrestrial.tif',
                                crop_extent      = c(273287.5,1870587.5,367787.5,1735787.5),
-							   grid_tbl         = "whse.nts_50k_grid",
+							   grid_tbl         = "whse_sp.nts_50k_grid",
 							   grid_loop_fld    = "map_tile",
 							   grid_geom_fld    = "geom",
 							   dst_schema       = "whse",
-							   dst_tbl          = "bc_riparian",
+							   dst_tbl          = "bc_riparian_fdp_fact",
 							   pg_conn_param    = pg_conn_param
 
 )
@@ -48,98 +48,19 @@ linear_weight <- function(
 	
 	## Buffer and Layer Rationale: Kootenay Lake data package
 	## Data Package: https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/forestry/stewardship/forest-analysis-inventory/tsr-annual-allowable-cut/13ts_dpkg_2020_november.pdf
-	lyr_1_tbl <- "whse.GBA_RAILWAY_TRACKS_SP"
-	lyr_1_buf <- "15"
-
-	lyr_2_tbl <- "whse.GBA_TRANSMISSION_LINES_SP"
-	lyr_2_buf <- "25"
-
-	lyr_3_tbl <- "whse.DRP_OIL_GAS_PIPELINES_BC_SP"
-	lyr_3_buf <- "15"
-
-	lyr_4_tbl <- "whse.OG_PIPELINE_AREA_PERMIT_SP"
-	lyr_4_buf <- "15"
-
-	lyr_5_tbl <- "whse.integratedroadsbuffers"
-	## no buffer as it is a polygon layer
-
-	## Rationale: Sunshine Coast, North Island data package
-	## https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/forestry/stewardship/forest-analysis-inventory/tsr-annual-allowable-cut/39ts_dpkg_2021.pdf
-	lyr_6_tbl <- "whse.ta_crown_rights_of_way_svw"
-	## no buffer as it is a polygon layer
 
 
-	spatial_query <- "WITH buffered_intersects AS (
-	SELECT
-		ST_Buffer(vect.geom, {lyr_1_buf}) as geom
+	spatial_query <- "SELECT
+		geom as geom
 	FROM
-		{lyr_1_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
+		whse_sp.riparian_buffers_fdp_union
 	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_2_buf}) as geom
+		{grid_loop_fld} = '{grid_row}'"
+
+	spatial_query_when_error <- "SELECT
+		ST_Intersection(vect.geom, grid.{grid_geom_fld}) as geom
 	FROM
-		{lyr_2_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_3_buf}) as geom
-	FROM
-		{lyr_3_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_4_buf}) as geom
-	FROM
-		{lyr_4_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		vect.geom as geom -- no buffer needed, already buffered
-	FROM
-		{lyr_5_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		vect.geom as geom -- no buffer needed, already buffered
-	FROM
-		{lyr_6_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	)
-	SELECT
-		ST_Intersection(ST_Union(vect.geom), grid.{grid_geom_fld}) as geom
-	FROM
-		buffered_intersects vect
+		public.kamloops_fdp_diff_11 vect
 	JOIN
 		{grid_tbl} grid
 	ON
@@ -147,87 +68,7 @@ linear_weight <- function(
 	WHERE
 		grid.{grid_loop_fld} = '{grid_row}'
 	GROUP BY 	
-		grid.{grid_geom_fld}"
-
-	spatial_query_when_error <- "WITH buffered_intersects AS (
-	SELECT
-		ST_Buffer(vect.geom, {lyr_1_buf}) as geom
-	FROM
-		{lyr_1_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_2_buf}) as geom
-	FROM
-		{lyr_2_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_3_buf}) as geom
-	FROM
-		{lyr_3_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		ST_Buffer(vect.geom, {lyr_4_buf}) as geom
-	FROM
-		{lyr_4_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		vect.geom as geom -- no buffer needed, already buffered
-	FROM
-		{lyr_5_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	UNION ALL
-	SELECT
-		vect.geom as geom -- no buffer needed, already buffered
-	FROM
-		{lyr_6_tbl} vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	)
-	SELECT
-		ST_Intersection(ST_Buffer(ST_Union(vect.geom), 0.0001), grid.{grid_geom_fld}) as geom
-	FROM
-		buffered_intersects vect
-	JOIN
-		{grid_tbl} grid
-	ON
-		ST_Intersects(vect.geom, grid.{grid_geom_fld})
-	WHERE
-		grid.{grid_loop_fld} = '{grid_row}'
-	GROUP BY 	
-		grid.{grid_geom_fld}"
+		grid.{grid_geom_fld}, vect.geom"
 	## create a terra extent object
 	terra_extent <- terra::ext(crop_extent[1], crop_extent[2], crop_extent[3], crop_extent[4])
 	print(glue('Reading in raster: {template_tif}'))
@@ -268,23 +109,32 @@ linear_weight <- function(
 		modified_at timestamp with time zone DEFAULT now());")
 	run_sql_r(query, pg_conn_param)
 
-	query <- glue("INSERT INTO {dst_schema}.{dst_tbl}_status ({grid_loop_fld})
-				SELECT
-					grid.{grid_loop_fld}
-				FROM
-					{grid_tbl} grid
-				LEFT JOIN
-					{dst_schema}.{dst_tbl}_status status
-				USING ({grid_loop_fld})
-					WHERE status.{grid_loop_fld} is null;
-				")
+	query <- glue("
+	WITH a AS (
+		SELECT
+			{grid_loop_fld}
+		FROM
+			whse_sp.riparian_buffers_fdp vect
+		GROUP BY 
+			{grid_loop_fld}
+	)
+	INSERT INTO {dst_schema}.{dst_tbl}_status ({grid_loop_fld})
+		SELECT
+			grid.map_tile
+		FROM
+			a grid
+		LEFT JOIN
+			{dst_schema}.{dst_tbl}_status status
+		USING ({grid_loop_fld})
+			WHERE status.{grid_loop_fld} is null;
+		")
 	run_sql_r(query, pg_conn_param)
 
 
 	query <- glue("CREATE TABLE IF NOT EXISTS {dst_schema}.{dst_tbl} (
 		gr_skey INTEGER NOT NULL PRIMARY KEY,
 		fact numeric NOT NULL,
-		{grid_loop_fld} character varying(32) NOT NULL);")
+		map_tile text NOT NULL);")
 	run_sql_r(query, pg_conn_param)
 	
 	## retrieve map tiles to loop over from status table
@@ -301,8 +151,10 @@ linear_weight <- function(
 			vect <- st_cast(st_read(conn, query = glue(spatial_query), crs = 3005), "MULTIPOLYGON")
 		}, error = function(e){
 			## in the case of an error - wrap a buffer within 0.0001 width to 'fix'
-			vect <- st_cast(st_read(conn, query = glue(spatial_query_when_error), crs = 3005), "MULTIPOLYGON")
+			print('error, running error query')
+			vect <- st_cast(st_read(conn, query = glue(spatial_query), crs = 3005), "MULTIPOLYGON")
 		})
+		
 		# print('1')
 		if (nrow(vect) < 1) {
 			# print('2')
@@ -343,8 +195,8 @@ linear_weight <- function(
 			WHEN d.{grid_loop_fld} = EXCLUDED.{grid_loop_fld} THEN EXCLUDED.fact
 			ELSE EXCLUDED.fact + d.fact
 		END;")
-		run_sql_r(query, pg_conn_param)
 		# print('6')
+		run_sql_r(query, pg_conn_param)
 		query <- glue("UPDATE {dst_schema}.{dst_tbl}_status SET status = 'completed', modified_at = now() WHERE {grid_loop_fld} = '{grid_row}'")
 		run_sql_r(query, pg_conn_param)
 		# print('7')
@@ -353,19 +205,7 @@ linear_weight <- function(
 	today_date <- format(Sys.time(), "%Y-%m-%d %I:%M:%S %p")
 	tbl_comment <- glue("COMMENT ON TABLE {dst_schema}.{dst_tbl} IS 'Table created at {today_date}.
 	Table contains the gr_skey pixel percent coverage by the following layers:
-	Layer: {lyr_1_tbl}
-	Buffer: {lyr_1_buf}
-
-	Layer: {lyr_2_tbl}
-	Buffer: {lyr_2_buf}
-
-	Layer: {lyr_3_tbl}
-	Buffer: {lyr_3_buf}
-
-	Layer: {lyr_4_tbl}
-	Buffer: {lyr_4_buf}
-
-	Layer: whse.integratedroadsbuffers
+	Layer: public.kamloops_fdp_diff_11
 	Buffer: No buffer, layer already buffered in Analysis Ready Dataset'")
 	run_sql_r(tbl_comment, pg_conn_param)
 	run_sql_r(glue("DROP TABLE {dst_schema}.{dst_tbl}_tmp;"), pg_conn_param)
