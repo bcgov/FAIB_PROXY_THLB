@@ -130,14 +130,15 @@ query <- "SELECT
 	p.n06_parks,
 	p.n07_wha,
 	p.n08_misc,
-	p.p09_riparian,
+	coalesce(rip.fact,0) as p09_riparian,
   p.n10_arch,
 	p.n11_harvest_restrictions,
 	p.p12_phys_inop,
 	p.n13_non_merchantable,
 	p.n14_non_commercial
 FROM whse.thlb_proxy_netdown p
---WHERE man_unit IN ('Arrow TSA')--, 'Fort St. John TSA', 'Fort Nelson TSA')
+LEFT JOIN public.riparian_buffers18_gr_skey rip on rip.gr_skey = p.gr_skey
+WHERE man_unit IN ('Merritt TSA')--, 'Fort St. John TSA', 'Fort Nelson TSA')
 "
 netdown_tab <- sql_to_df(query, conn_list)
 netdown_summary <- setup_tracking_variable(netdown_tab)
@@ -2073,12 +2074,14 @@ retention_adjustment_df <- sql_to_df(query, conn_list)
 
 ```{r thlb_ltr_adj, eval= TRUE}
 ## add in the adjusted retention as a column in the netdown dataframe
-netdown_tab <- netdown_tab %>%
-  left_join(
-    retention_adjustment_df %>% select(tsa, adjusted_retention), 
-    by = c("tsa_rank1" = "tsa")
-  ) %>%
-  rename(p15_future_retention = adjusted_retention)
+## netdown_tab <- netdown_tab %>%
+##  left_join(
+##    retention_adjustment_df %>% select(tsa, adjusted_retention), 
+##    by = c("tsa_rank1" = "tsa")
+##  ) %>%
+##  rename(p15_future_retention = adjusted_retention)
+
+netdown_tab$p15_future_retention <- 0.09588
 
 lclass<-"Future Retention"
 n_step<-"p15_future_retention"
@@ -2181,7 +2184,7 @@ JOIN harvest_netdown_adjustment adj USING (gr_skey);
 ```
  
  
-```{r aflb_to_pg, eval= TRUE}
+```{r aflb_to_pg, eval= FALSE}
 
 df_to_pg(Id(schema = 'whse', table = 'prov_netdown_temp'), netdown_tab[,c('gr_skey', 'fmlb', 'falb', 'aflb', 'thlb_net', 'p15_future_retention')], conn_list, overwrite=TRUE)
 
@@ -2189,7 +2192,7 @@ df_to_pg(Id(schema = 'whse', table = 'prov_netdown_temp'), netdown_tab[,c('gr_sk
 
 
 
-```{r aflb_to_pgs, eval= TRUE}
+```{r aflb_to_pgs, eval= FALSE}
 query <- "UPDATE whse.thlb_proxy_netdown set 
   fmlb = a.fmlb,
   falb = a.falb,

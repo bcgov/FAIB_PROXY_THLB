@@ -735,7 +735,7 @@ netdown100pct<-function(netdown_tab, net_summary, running_total, lclass, n_step)
     # filter to where netdown step variable is NOT NA.
     filter(!is.na(get(n_step))) %>%
     # calculate thlb_net area
-    summarise(x = sum(thlb_net)) %>%
+    summarise(x = sum(thlb_net, na.rm=TRUE)) %>%
     pull() # pull value
 
   # calculate new running total value
@@ -796,7 +796,7 @@ netdown_prop<-function(netdown_tab, netdown_summary, running_total, lclass, n_st
 }
 
 # this function is used when a landbase summary is needed. I.e., AFLB, grossTHLB, THLB:
-landbase_sum <- function(netdown_tab,net_summary,running_total,lclass,netdown,which_landbase=thlb_net){
+landbase_sum <- function(netdown_tab,net_summary,running_total,lclass,netdown,which_landbase){
   landclass <- lclass
   total <- netdown_tab %>%
     summarise(x = sum({{ which_landbase }})) %>%
@@ -811,23 +811,136 @@ landbase_sum <- function(netdown_tab,net_summary,running_total,lclass,netdown,wh
 }
 
 
+## function only works when input layers are in BC Albers / EPSG: 3005
+pixel_weight <- function(template_tif,
+                         mask_tif,
+                         vect,
+                         crop_extent,
+                         dst_schema,
+                         dst_tbl,
+                         pg_conn_param,
+                         write_out_raster,
+                         raster_path
+){
+  script_start_time <- Sys.time()
+  print(glue("Script started at {format(script_start_time, '%Y-%m-%d %I:%M:%S %p')}"))
+
+  ## create a terra extent object
+  terra_extent <- terra::ext(crop_extent[1], crop_extent[2], crop_extent[3], crop_extent[4])
+  print(glue('Reading in raster: {template_tif}'))
+  template_rast <- terra::rast(template_tif)
+  template_raster_datatype <- datatype(template_rast)
+
+  print(glue('Reading in raster: {mask_tif}'))
+  mask_rask <- terra::rast(mask_tif)
+
+  rast_lift <- list(template_rast, mask_rask)
+  print(glue('Cropping gr_skey grid and mask crop_extent...'))
+  crop_list <- lapply(rast_lift, function(x){
+    crs(x) <-  "epsg:3005"
+    terra::crop(x, terra_extent, datatype='INT4S')
+  }
+  )
+  ## reassign newly cropped layers to original variable
+  template_rast <- crop_list[[1]]
+  mask_rask <- crop_list[[2]]
+
+  ## Create a new masked gr_skey raster
+  gr_skey_rast <- terra::mask(template_rast, mask_rask, datatype = template_raster_datatype)
+
+  ## release large rasters from memory
+  template_rast <- NULL
+  mask_rask <- NULL
+
+  conn <- DBI::dbConnect(pg_conn_param["driver"][[1]],
+                         host     = pg_conn_param["host"][[1]],
+                         user     = pg_conn_param["user"][[1]],
+                         dbname   = pg_conn_param["dbname"][[1]],
+                         password = pg_conn_param["password"][[1]],
+                         port     = pg_conn_param["port"][[1]])
+
+
+  query <- glue("DROP TABLE IF EXISTS {dst_schema}.{dst_tbl};")
+  run_sql_r(query, pg_conn_param)
+
+  query <- glue("CREATE TABLE IF NOT EXISTS {dst_schema}.{dst_tbl} (
+		gr_skey INTEGER NOT NULL PRIMARY KEY,
+		fact numeric NOT NULL)")
+  run_sql_r(query, pg_conn_param)
+
+  vect_extent <- terra::ext(vect)
+  rast_clipped <- terra::crop(gr_skey_rast, vect_extent)
+
+  ## the MAGIQUE!
+  results <- terra::extract(rast_clipped, vect, weights = TRUE, na.rm = TRUE)
+
+  ## within the results, records sometimes exist where bc_01ha_gr_skey IS NULL
+  ## this happen on the coast when the raster has been masked but the linear features
+  ## exists outside the mask
+  ## They are not needed, remove records with NULL values in bc_01ha_gr_skey
+  results <- results[complete.cases(results$bc_01ha_gr_skey), ]
+
+  ## if there is more than 1 gr_skey being returned - sum all duplicates together and if the resultant is > 1, set to 1.
+  sum_weight_by_bc_01ha_gr_skey <- results %>%
+    group_by(bc_01ha_gr_skey) %>%
+    summarise(fact = sum(weight), .groups = "drop") %>%
+    mutate(fact = ifelse(fact > 1, 1, fact))
+
+  colnames(sum_weight_by_bc_01ha_gr_skey) <- c('gr_skey', 'fact')
+  ## write results to a postgres table
+  df_to_pg(Id(schema = dst_schema, table = dst_tbl), sum_weight_by_bc_01ha_gr_skey, pg_conn_param, overwrite=TRUE)
+
+  ## build a helpful table comment
+  today_date <- format(Sys.time(), "%Y-%m-%d %I:%M:%S %p")
+  tbl_comment <- glue("COMMENT ON TABLE {dst_schema}.{dst_tbl} IS 'Table created at {today_date}.")
+  run_sql_r(query, pg_conn_param)
+
+  if (!is.null(raster_path)) {
+    print(glue("Writing out result raster to {raster_path}"))
+
+    # Create a copy of gr_skey_rast to hold the output values
+    out_rast <- gr_skey_rast
+    values(out_rast) <- NA
+
+    # Extract raster values (gr_skey per cell)
+    gr_skey_vals <- values(gr_skey_rast)
+
+    # Lookup table
+    fact_df <- sum_weight_by_bc_01ha_gr_skey
+
+    # Use match() to align raster cell values with fact values
+    idx <- match(gr_skey_vals, fact_df$gr_skey)
+
+    # Fill output raster with matched fact values (NA where no match)
+    out_vals <- fact_df$fact[idx]
+
+    # Assign new values
+    values(out_rast) <- out_vals
+
+    # Write out
+    terra::writeRaster(out_rast, raster_path, overwrite = TRUE)
+  }
+  end_time <- Sys.time()
+  duration <- round(difftime(end_time, script_start_time, units = "mins"), 2)
+  print(glue('Script finished. Duration: {duration} minutes.'))
+}
 
 
 #### ### recreation
 #### Below is a specific list of ownership classes excluded:
-#### 
-#### + 66N, Crown - Recreation Area 
-#### + 68U, Crown - Forest Recreation 
-#### 
+####
+#### + 66N, Crown - Recreation Area
+#### + 68U, Crown - Forest Recreation
+####
 #### **Data sources:** BCGW file: WHSE_FOREST_VEGETATION.F_OWN
-#### 
-#### Forest Recreation sites were not excluded from the THLB as there are no harvesting restrictions. 
-#### 
+####
+#### Forest Recreation sites were not excluded from the THLB as there are no harvesting restrictions.
+####
 #### ```{r thlb_rec, eval= FALSE}
 #### ## NOT RAN
 #### lclass<-"Recreation_Features"
 #### n_step<-"n08_rec"
-#### 
+####
 #### netdown_summary<-netdown100pct(netdown_tab,netdown_summary,running_total,lclass,n_step)
 #### netdown_tab<-update_areas_thlb(netdown_tab,n_step)
 #### running_total<-get_running_total(netdown_summary,lclass)
