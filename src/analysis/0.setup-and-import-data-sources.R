@@ -104,6 +104,7 @@ batch_import_to_pg_gr_skey(
 ## 1.scripts: importing data sources:
 run_sql_psql(sql_var=NULL, sql_file = 'src/analysis/0.recreate_man_unit_gr_skey.sql', 'thlb_proxy')
 
+## Note: the function: import_bcgw_to_pg relies on he oracle foreign server: oradb existing. If working on a fresh db that doesn't have the oracle foreign server set up yet - be sure to import layers using dadmtools first as it will set up the oracle foreign server
 source('src/analysis/1.fmlb-import-layers.R')
 source('src/analysis/1.linear-features-import-layers.R')
 source('src/analysis/1.non-commercial-species-import-layers.R')
