@@ -1742,7 +1742,18 @@ The above rules were applied to stands with the following dominant species:
 
 **Note:** All harvested openings were excluded from this netdown step. In other words, if the area was ever harvested, it was not excluded out of the pTHLB due to being non-merchantable.
 
-**Data sources:** BCGW layer: WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY
+**Data sources:** BCGW layer: WHSE_FOREST_VEGETATION.VEG_CONSOLIDATED_CUT_BLOCKS_SP, WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY
+
+BC Data Catalogue layer: 
+
++ [2016 VRI](https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2022-])
+
+Shared drive layers: 
+
++ 2016 VRI with TFL Integrated
+
+  + `\\spatialfiles2.bcgov\work\FOR\VIC\HTS\DAM\Data\VRI\TFL_Integrated\TFL_integrated_2016_delivery_final.gdb`
+  
 
 __R Scripts__
 
