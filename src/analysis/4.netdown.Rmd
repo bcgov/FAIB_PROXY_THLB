@@ -1459,37 +1459,7 @@ WHERE
 	inop_cc.mgmt_unit ilike '%TSA'
 ORDER BY split_part(mgmt_unit, ' - ', 1)::int
 )
-
--- WITH tfl AS (
--- 	-- join inoperable table with man unit table to determine where a TFL exists but uses a different management unit threshold
--- 	select
--- 		mu.tfl_rank1,
--- 		inop.man_unit
--- 	from
--- 	thlb_proxy.bc_inoperable_gr_skey inop
--- 	join
--- 	whse.man_unit_gr_skey mu USING (gr_skey)
--- 	WHERE tfl_rank1 IS NOT NULL
--- 	GROUP BY 
--- 		inop.man_unit,
--- 		mu.tfl_rank1
--- 	HAVING count(*) > 500
--- ), TSA AS (
--- 	-- join inoperable table with man unit table to determine where a TSA exists but uses a different management unit threshold
--- 	select
--- 		mu.tsa_rank1,
--- 		inop.man_unit,
--- 		count(*)
--- 	from
--- 	thlb_proxy.bc_inoperable_gr_skey inop
--- 	join
--- 	whse.man_unit_gr_skey mu USING (gr_skey)
--- 	WHERE tsa_rank1 IS NOT NULL
--- 	GROUP BY 
--- 		inop.man_unit,
--- 		mu.tsa_rank1
--- 	HAVING count(*) > 5000
--- )"
+"
 
 phys_inop_thresholds_df <- sql_to_df(query, conn_list)
 
@@ -1510,12 +1480,13 @@ kable(phys_inop_thresholds_df,
                 font_size = 10)
 ```
 </details>
+<br>
 
 **Data sources:** BCGW layer: WHSE_TERRESTRIAL_ECOLOGY.STE_TER_ATTRIBUTE_POLYS_SVW, WHSE_FOREST_VEGETATION.VEG_CONSOLIDATED_CUT_BLOCKS_SP
 
 Shared drive layer: 
 
-+ R:\\dem\\elevation\\trim_25m\\bcalbers\\tif\\bc_elevation_25m_bcalb.tif
++ \\imagefiles.bcgov\\imagery\\dem\\elevation\\trim_25m\\bcalbers\\tif\\bc_elevation_25m_bcalb.tif
 
 __R Scripts__
 
@@ -1686,6 +1657,8 @@ kable(mer_thresholds_df,
 ```
 </details>
 <br>
+
+
 **Data sources:** BCGW layer: WHSE_FOREST_VEGETATION.VEG_CONSOLIDATED_CUT_BLOCKS_SP, WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY
 
 BC Data Catalogue layer: 
@@ -1769,6 +1742,8 @@ The above rules were applied to stands with the following dominant species:
 
 **Note:** All harvested openings were excluded from this netdown step. In other words, if the area was ever harvested, it was not excluded out of the pTHLB due to being non-merchantable.
 
+**Data sources:** BCGW layer: WHSE_FOREST_VEGETATION.VEG_COMP_LYR_R1_POLY
+
 __R Scripts__
 
 The following scripts were used to perform pre-processing:
@@ -1827,6 +1802,7 @@ data\analysis\retention\man_unit_retention_histograms_2024_12_12.pdf
 ```
 
 **Note** Fort Nelson TSA did not have any RESULTS reserves data. As such, the retention results from the adjacent Fort St. John TSA will be used to represent retention in Fort Nelson TSA.
+
 **Data sources:** BCGW layer: WHSE_FOREST_VEGETATION.RSLT_OPENING_SVW, WHSE_FOREST_VEGETATION.RSLT_FOREST_COVER_INV_SVW, WHSE_FOREST_VEGETATION.RSLT_FOREST_COVER_RESERVE_SVW
 
 __R Scripts__
