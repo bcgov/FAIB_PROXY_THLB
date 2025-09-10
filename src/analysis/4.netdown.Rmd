@@ -136,7 +136,7 @@ query <- "SELECT
 	p.p12_phys_inop,
 	p.n13_non_merchantable,
 	p.n14_non_commercial
-FROM whse.thlb_proxy_netdown p
+FROM public.thlb_proxy_netdown_merritt p
 LEFT JOIN public.riparian_buffers18_gr_skey rip on rip.gr_skey = p.gr_skey
 WHERE man_unit IN ('Merritt TSA')--, 'Fort St. John TSA', 'Fort Nelson TSA')
 "
@@ -1332,7 +1332,7 @@ SELECT
 	round(slope_threshold.slope_99th::numeric, 1) as slope_threshold
 	
 FROM 
-whse.inoperable_cutblock_summary inop_cc
+public.inoperable_cutblock_summary inop_cc
 JOIN
 	(
 		SELECT 
@@ -1340,7 +1340,7 @@ JOIN
 			cutblock_percentile_99 as elev_99th,
 			split_part(inop.man_unit, '-sub-', 1) as man_unit
 		FROM 
-			whse.inoperable_thresholds inop
+			public.inoperable_thresholds inop
 		WHERE grid = 'elevation'
 		ORDER BY
 			cutblock_percentile_99,
@@ -1354,7 +1354,7 @@ JOIN
 			cutblock_percentile_99 as slope_99th,
 			split_part(inop.man_unit, '-sub-', 1) as man_unit
 		FROM 
-		whse.inoperable_thresholds inop
+		public.inoperable_thresholds inop
 		WHERE grid = 'slope'
 		ORDER BY
 			cutblock_percentile_99,
@@ -1380,7 +1380,7 @@ UNION ALL
 	round(slope_threshold.slope_99th::numeric, 1) as slope_threshold
 	
 FROM 
-whse.inoperable_cutblock_summary inop_cc
+public.inoperable_cutblock_summary inop_cc
 JOIN
 	(
 		SELECT 
@@ -1388,7 +1388,7 @@ JOIN
 			cutblock_percentile_99 as elev_99th,
 			split_part(inop.man_unit, '-sub-', 1) as man_unit
 		FROM 
-			whse.inoperable_thresholds inop
+			public.inoperable_thresholds inop
 		WHERE grid = 'elevation'
 		ORDER BY
 			cutblock_percentile_99,
@@ -1402,7 +1402,7 @@ JOIN
 			cutblock_percentile_99 as slope_99th,
 			split_part(inop.man_unit, '-sub-', 1) as man_unit
 		FROM 
-		whse.inoperable_thresholds inop
+		public.inoperable_thresholds inop
 		WHERE grid = 'slope'
 		ORDER BY
 			cutblock_percentile_99,
@@ -1412,38 +1412,7 @@ ON split_part(inop_cc.mgmt_unit, '-sub-', 1) = slope_threshold.man_unit
 WHERE 
 	inop_cc.mgmt_unit ilike '%TSA'
 ORDER BY split_part(mgmt_unit, ' - ', 1)::int
-)
-
--- WITH tfl AS (
--- 	-- join inoperable table with man unit table to determine where a TFL exists but uses a different management unit threshold
--- 	select
--- 		mu.tfl_rank1,
--- 		inop.man_unit
--- 	from
--- 	thlb_proxy.bc_inoperable_gr_skey inop
--- 	join
--- 	whse.man_unit_gr_skey mu USING (gr_skey)
--- 	WHERE tfl_rank1 IS NOT NULL
--- 	GROUP BY 
--- 		inop.man_unit,
--- 		mu.tfl_rank1
--- 	HAVING count(*) > 500
--- ), TSA AS (
--- 	-- join inoperable table with man unit table to determine where a TSA exists but uses a different management unit threshold
--- 	select
--- 		mu.tsa_rank1,
--- 		inop.man_unit,
--- 		count(*)
--- 	from
--- 	thlb_proxy.bc_inoperable_gr_skey inop
--- 	join
--- 	whse.man_unit_gr_skey mu USING (gr_skey)
--- 	WHERE tsa_rank1 IS NOT NULL
--- 	GROUP BY 
--- 		inop.man_unit,
--- 		mu.tsa_rank1
--- 	HAVING count(*) > 5000
--- )"
+)"
 
 phys_inop_thresholds_df <- sql_to_df(query, conn_list)
 
@@ -1554,7 +1523,7 @@ A table containing the calculated 5th percentile site index is provided below.
   <summary> Expand to view the table of 5th percentile thresholds used in the analysis. </summary>
   <br>
 
-```{r thlb_mer_thresh, eval= TRUE}
+```{r thlb_mer_thresh, eval= FALSE}
 query <- "	WITH a AS (
 	SELECT
 		CASE 
@@ -1802,21 +1771,10 @@ query <- "SELECT
   upper_bound_percentile, 
   lower_bounds, 
   upper_bounds, 
-  weighted_mean_ltr 
+  -- weighted_mean_ltr 
+  0.15 as weighted_mean_ltr -- adjustment requested by Michelle
 FROM 
-whse.retention_thresholds_man_unit 
-UNION ALL 
-SELECT 
-  '8 - Fort Nelson TSA', 
-  lower_bound_percentile, 
-  upper_bound_percentile, 
-  lower_bounds, 
-  upper_bounds, 
-  weighted_mean_ltr 
-FROM 
-  whse.retention_thresholds_man_unit 
-WHERE 
-  man_unit = '40 - Fort St. John TSA'"
+public.retention_thresholds_man_unit  where man_unit = '18 - Merritt TSA'"
 ltr_df <- sql_to_df(query, conn_list)
 
 ltr_df <- ltr_df %>%
@@ -2013,26 +1971,21 @@ df_new <- all_tsa_results %>%
 all_tsa_results <- bind_rows(all_tsa_results, df_new)
 
 ## write table that contains retention adjust to postgres
-df_to_pg(Id(schema = 'thlb_proxy', table = 'retention_adjustment_man_unit'), all_tsa_results, conn_list, overwrite=TRUE)
+df_to_pg(Id(schema = 'public', table = 'retention_adjustment_man_unit_merritt'), all_tsa_results, conn_list, overwrite=TRUE)
 
 
 ## join the previously created long term retention table to the newly created adjustment table & create the adjusted retention factor
 query <- "WITH ltr AS (
-SELECT * 
-FROM 
-whse.retention_thresholds_man_unit 
-UNION ALL 
 SELECT 
-  '8 - Fort Nelson TSA', 
+  man_unit, 
   lower_bound_percentile, 
   upper_bound_percentile, 
   lower_bounds, 
   upper_bounds, 
-  weighted_mean_ltr 
+  -- weighted_mean_ltr ## adjustment requested by Michelle
+  0.15 as weighted_mean_ltr 
 FROM 
-  whse.retention_thresholds_man_unit 
-where 
-  man_unit = '40 - Fort St. John TSA'
+public.retention_thresholds_man_unit  where man_unit = '18 - Merritt TSA'
 )
 SELECT
 	adj.tsa,
@@ -2041,7 +1994,7 @@ SELECT
 	ltr.weighted_mean_ltr * adj.percent/100.0 as adjusted_retention
 FROM 
 ltr
-JOIN whse.retention_adjustment_man_unit adj
+JOIN public.retention_adjustment_man_unit_merritt adj
 ON 
   adj.tsa = split_part(ltr.man_unit, ' - ', 2)
 WHERE 
@@ -2074,14 +2027,14 @@ retention_adjustment_df <- sql_to_df(query, conn_list)
 
 ```{r thlb_ltr_adj, eval= TRUE}
 ## add in the adjusted retention as a column in the netdown dataframe
-## netdown_tab <- netdown_tab %>%
-##  left_join(
-##    retention_adjustment_df %>% select(tsa, adjusted_retention), 
-##    by = c("tsa_rank1" = "tsa")
-##  ) %>%
-##  rename(p15_future_retention = adjusted_retention)
+ netdown_tab <- netdown_tab %>%
+  left_join(
+   retention_adjustment_df %>% select(tsa, adjusted_retention), 
+    by = c("tsa_rank1" = "tsa")
+  ) %>%
+  rename(p15_future_retention = adjusted_retention)
 
-netdown_tab$p15_future_retention <- 0.09588
+## netdown_tab$p15_future_retention <- 0.09588
 
 lclass<-"Future Retention"
 n_step<-"p15_future_retention"
@@ -2114,94 +2067,82 @@ In the event that modifications of the land bases or netdown factors are require
  + Make a local copy of this git repository and modify this R markdown to include/exclude new or modified netdown factors. 
  + SQL is provided below of how the land base columns can be recreated using SQL instead of R. This can be useful when wanting to skip the process of the netdown table in favor of quickly updating the THLB field
  
-```{sql, eval=FALSE}
-WITH harvest_netdown_adjustment AS (
-SELECT
-	gr_skey,
-	-- recreate what the R netdown does by adjusting physically inoperable to be 1 when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
-	CASE 
-		WHEN harvest_start_year_calendar IS NOT NULL THEN 0
-		ELSE p12_phys_inop
-	END AS p12_phys_inop,
-	-- recreate what the R netdown does by adjusting merchantability to be NULL when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
-	CASE 
-		WHEN harvest_start_year_calendar IS NOT NULL THEN NULL
-		ELSE n13_merchantability
-	END AS n13_merchantability,
-	-- recreate what the R netdown does by adjusting non commercial to be NULL when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
-	CASE 
-		WHEN harvest_start_year_calendar IS NOT NULL THEN NULL
-		ELSE n14_non_commercial
-	END AS n14_non_commercial	
-FROM
-<public.proxy_table> net -- <- edit with the imported proxy table from the SQL dump
+```{r create_scenario_netdown, eval=TRUE}
+new_ret_adj <- unique(netdown_tab$p15_future_retention)
+
+query <- glue("DROP TABLE IF EXISTS public.merritt_scenario_{format(Sys.Date(), '%Y_%m_%d')};")
+run_sql_r(query, conn_list)
+query <- glue("CREATE TABLE public.merritt_scenario_{format(Sys.Date(), '%Y_%m_%d')} AS
+with merritt_alteration as (
+  SELECT
+  pthlb.gr_skey,
+  man_unit,
+  n01_fmlb,
+  n02_ownership,
+  n03_ownership,
+  n04_nonfor,
+  p05_linear_features,
+  n06_parks,
+  n07_wha,
+  n08_misc,
+  coalesce(rip.fact,0) as p09_riparian,
+  n10_arch,
+  n11_harvest_restrictions,
+  -- recreate what the R netdown does by adjusting physically inoperable to be 1 when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
+  CASE
+  WHEN harvest_start_year_calendar IS NOT NULL THEN 0
+  ELSE p12_phys_inop
+  END AS p12_phys_inop,
+  -- recreate what the R netdown does by adjusting merchantability to be NULL when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
+  CASE
+  WHEN harvest_start_year_calendar IS NOT NULL THEN NULL
+  ELSE n13_non_merchantable
+  END AS n13_non_merchantable,
+  -- recreate what the R netdown does by adjusting non commercial to be NULL when a cutblocks exists (harvest start year is pulled from consolidated cutblocks layer)
+  CASE
+  WHEN harvest_start_year_calendar IS NOT NULL THEN NULL
+  ELSE n14_non_commercial
+  END AS n14_non_commercial,
+  {new_ret_adj} as p15_future_retention
+  from
+  public.thlb_proxy_netdown_merritt pthlb
+  LEFT JOIN public.riparian_buffers18_gr_skey rip on rip.gr_skey = pthlb.gr_skey
+  where man_unit = 'Merritt TSA'
 )
-select 	
-	sum(CASE
-			WHEN 
-				n01_fmlb IS NULL 
-				THEN 1 
-			ELSE 0 
-		END) as fmlb,
-	sum(CASE 
-			-- categorical netdowns
-			WHEN 
-				n01_fmlb IS NULL AND 
-				n02_ownership IS NULL 
-				THEN 1
-			ELSE 0 
-		END) as falb,
-	sum(CASE
-			WHEN 
-				n01_fmlb IS NULL AND 
-				n02_ownership IS NULL AND 
-				n03_ownership IS NULL AND 
-				n04_nonfor IS NULL 
-				THEN 1 * (1-p05_linear_features)
-			ELSE 0 
-		END) as paflb,
-	sum(CASE 
-			WHEN 
-				-- categorical netdowns
-				n01_fmlb IS NULL AND 
-				n02_ownership IS NULL AND 
-				n03_ownership IS NULL AND 
-				n04_nonfor IS NULL AND 
-				n06_parks IS NULL AND 
-				n07_wha IS NULL AND 
-				n08_misc IS NULL AND 
-				n10_arch IS NULL AND
-				n11_harvest_restrictions IS NULL AND
-				adj.n13_merchantability IS NULL AND
-				adj.n14_non_commercial IS NULL
-				-- proportional netdowns
-				THEN 1 * (1-p05_linear_features) * (1-p09_riparian) * (1-adj.p12_phys_inop) * (1-p15_future_retention)
-			ELSE 0 
-		END) as pthlb_net
-from
-<public.proxy_table> net -- <- edit with the imported proxy table from the SQL dump
-JOIN harvest_netdown_adjustment adj USING (gr_skey);
-```
- 
- 
-```{r aflb_to_pg, eval= FALSE}
-
-df_to_pg(Id(schema = 'whse', table = 'prov_netdown_temp'), netdown_tab[,c('gr_skey', 'fmlb', 'falb', 'aflb', 'thlb_net', 'p15_future_retention')], conn_list, overwrite=TRUE)
-
-```
-
-
-
-```{r aflb_to_pgs, eval= FALSE}
-query <- "UPDATE whse.thlb_proxy_netdown set 
-  fmlb = a.fmlb,
-  falb = a.falb,
-  paflb = a.aflb,
-  pthlb_net = a.thlb_net,
-  p15_future_retention = a.p15_future_retention
-from
-  whse.prov_netdown_temp a
-where a.gr_skey = whse.thlb_proxy_netdown.gr_skey;"
+SELECT
+gr_skey,
+p09_riparian as rmz,
+p15_future_retention as wtra,
+CASE
+WHEN
+n01_fmlb IS NULL AND
+n02_ownership IS NULL AND
+n03_ownership IS NULL AND
+n04_nonfor IS NULL
+THEN 1 * (1-p05_linear_features)
+ELSE 0
+END as paflb,
+CASE
+WHEN
+-- categorical netdowns
+n01_fmlb IS NULL AND
+n02_ownership IS NULL AND
+n03_ownership IS NULL AND
+n04_nonfor IS NULL AND
+n06_parks IS NULL AND
+n07_wha IS NULL AND
+n08_misc IS NULL AND
+n10_arch IS NULL AND
+n11_harvest_restrictions IS NULL AND
+n13_non_merchantable IS NULL AND
+n14_non_commercial IS NULL
+-- proportional netdowns
+THEN 1 * (1-p05_linear_features) * (1-p09_riparian) * (1-p12_phys_inop) * (1-p15_future_retention)
+ELSE 0
+END as pthlb
+FROM
+merritt_alteration")
 run_sql_r(query, conn_list)
 ```
+ 
 
