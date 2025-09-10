@@ -179,3 +179,23 @@ con <- dbConnect(
 dbSendQuery(con, "DROP TABLE IF EXISTS prov_grskey.thlb_proxy_netdown")
 ## move the table over to prov_grskey schema
 dbSendQuery(con, "ALTER TABLE public.thlb_proxy_netdown SET SCHEMA prov_grskey")
+
+## HDE Notes: ran Sept 10, 2025 - does not need to ran annually unless the base data changes. 
+## exporting the riparian vectors with classes & buffer distance
+# out_poly_gdb_path <- glue("{output_dir}\\provincial_riparian_classes_polygon.gdb")
+# out_line_gdb_path <- glue("{output_dir}\\provincial_riparian_classes_line.gdb")
+# ## write out 2 geodatabase - one with multipolygons and one with linestrings
+# ## write out 2 as there have been errors when trying to write out different geometry types (ie. linestring & polygon) into the same gdb.
+# ## as a workaround, write out a gdb for each geometry type
+
+# ## rivers
+# system(glue("ogr2ogr -overwrite -f \"FileGDB\" {out_poly_gdb_path} PG:\"dbname='{conn_list$dbname}' host='{conn_list$host}' user='{conn_list$user}'\" -nlt MULTIPOLYGON -nln fwa_rivers_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, riv.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_vector.fwa_rivers_poly riv WHERE riparian_class IS NOT NULL\""))
+
+# ## lakes
+# system(glue("ogr2ogr -f \"FileGDB\" {out_poly_gdb_path} PG:\"dbname='{conn_list$dbname}' host='{conn_list$host}' user='{conn_list$user}'\" -nlt MULTIPOLYGON -nln fwa_lakes_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, lake.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_vector.fwa_lakes_poly lake WHERE riparian_class IS NOT NULL\" -update"))
+
+# ## wetlands
+# system(glue("ogr2ogr -f \"FileGDB\" {out_poly_gdb_path} PG:\"dbname='{conn_list$dbname}' host='{conn_list$host}' user='{conn_list$user}'\" -nlt MULTIPOLYGON -nln fwa_wetlands_poly -sql \"SELECT waterbody_poly_id::int, watershed_group_id::int, waterbody_type, gnis_name_1, fwa_watershed_code, local_watershed_code, watershed_group_code, left_right_tributary, feature_area_sqm, feature_length_m, wet.geom, riparian_class_reason, riparian_class, riparian_data_source FROM whse_vector.fwa_wetlands_poly wet WHERE riparian_class IS NOT NULL\" -update"))
+
+# ## streams
+# system(glue("ogr2ogr -overwrite -f \"FileGDB\" {out_line_gdb_path} PG:\"dbname='{conn_list$dbname}' host='{conn_list$host}' user='{conn_list$user}'\" -nlt MULTILINESTRING -nln fwa_stream_networks_sp_modelled_habitat_potential -sql \"SELECT fid, linear_feature_id::int, fish_habitat_id, blue_line_key, watershed_key, gnis_name, fwa_watershed_code, watershed_group_code, downstream_route_measure, waterbody_key, fwa_fcode_label, observation_id, gradient_barrier_030_id,gradient_barrier_050_id,gradient_barrier_080_id,gradient_barrier_150_id,gradient_barrier_220_id,gradient_barrier_300_id,intermittent_id,fish_obstacle_point_id,obstruction_id,subsurfaceflow_id,fish_habitat,slope,slope_class,stream_order,stream_magnitude,stream.geom,channel_width,channel_width_source,community_watershed,riparian_class,riparian_class_reason,riparian_data_source FROM whse.modelled_habitat_potential stream WHERE riparian_class IS NOT NULL\" -update"))
