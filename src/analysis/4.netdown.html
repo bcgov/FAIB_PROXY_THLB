@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Hailey Eckstrand" />
+<meta name="author" content="FAIB Data Analysis and Data Management Team" />
 
 
 <title>Provincial THLB Proxy Netdown</title>
@@ -4369,8 +4369,8 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Provincial THLB Proxy Netdown</h1>
-<h4 class="author">Hailey Eckstrand</h4>
-<h4 class="date">Last run on 2025-08-21</h4>
+<h4 class="author">FAIB Data Analysis and Data Management Team</h4>
+<h4 class="date">Last run on August 21, 2025</h4>
 
 </div>
 
@@ -4508,38 +4508,39 @@ sub-sections.</p>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&#39;../utils/functions.R&#39;</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>conn_list <span class="ot">&lt;-</span> dadmtools<span class="sc">::</span><span class="fu">get_pg_conn_list</span>()</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="do">## The following query was ran prior</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">## src\analysis\3.netdown-create-table.R</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="st">&quot;SELECT </span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="st">  p.gr_skey,</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="st">  p.tsa_rank1,</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="st">  p.wha_label,</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="st">  p.harvest_restriction_class_name,</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="st">  p.land_designation_type_code,</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="st">  p.harvest_start_year_calendar AS cc_year,</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="st">    p.current_retention,</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="st">    p.n01_fmlb,</span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="st">    p.n02_ownership,</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="st">    p.n03_ownership,</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="st">    p.n04_nonfor,</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="st">    p.p05_linear_features,</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="st">    p.n06_parks,</span></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="st">    p.n07_wha,</span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="st">    p.n08_misc,</span></span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="st">    p.p09_riparian,</span></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="st">  p.n10_arch,</span></span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="st">    p.n11_harvest_restrictions,</span></span>
-<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="st">    p.p12_phys_inop,</span></span>
-<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="st">    p.n13_non_merchantable,</span></span>
-<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="st">    p.n14_non_commercial</span></span>
-<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="st">FROM whse.thlb_proxy_netdown p&quot;</span></span>
-<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a>netdown_tab <span class="ot">&lt;-</span> <span class="fu">sql_to_df</span>(query, conn_list)</span>
-<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>netdown_summary <span class="ot">&lt;-</span> <span class="fu">setup_tracking_variable</span>(netdown_tab)</span>
-<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>running_total <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a><span class="fu">pretty_table</span>(netdown_summary)</span></code></pre></div>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">library</span>(keyring)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">source</span>(<span class="st">&#39;../utils/functions.R&#39;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>conn_list <span class="ot">&lt;-</span> dadmtools<span class="sc">::</span><span class="fu">get_pg_conn_list</span>()</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="do">## The following query was ran prior</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">## src\analysis\3.netdown-create-table.R</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>query <span class="ot">&lt;-</span> <span class="st">&quot;SELECT </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="st">  p.gr_skey,</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="st">  p.tsa_rank1,</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="st">  p.wha_label,</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="st">  p.harvest_restriction_class_name,</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="st">  p.land_designation_type_code,</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="st">  p.harvest_start_year_calendar AS cc_year,</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="st">    p.current_retention,</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="st">    p.n01_fmlb,</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="st">    p.n02_ownership,</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="st">    p.n03_ownership,</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="st">    p.n04_nonfor,</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="st">    p.p05_linear_features,</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="st">    p.n06_parks,</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="st">    p.n07_wha,</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="st">    p.n08_misc,</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="st">    p.p09_riparian,</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="st">  p.n10_arch,</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="st">    p.n11_harvest_restrictions,</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="st">    p.p12_phys_inop,</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="st">    p.n13_non_merchantable,</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="st">    p.n14_non_commercial</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="st">FROM whse.thlb_proxy_netdown p&quot;</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a>netdown_tab <span class="ot">&lt;-</span> <span class="fu">sql_to_df</span>(query, conn_list)</span>
+<span id="cb4-36"><a href="#cb4-36" tabindex="-1"></a>netdown_summary <span class="ot">&lt;-</span> <span class="fu">setup_tracking_variable</span>(netdown_tab)</span>
+<span id="cb4-37"><a href="#cb4-37" tabindex="-1"></a>running_total <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb4-38"><a href="#cb4-38" tabindex="-1"></a><span class="fu">pretty_table</span>(netdown_summary)</span></code></pre></div>
 <table class="table table-striped" style="font-size: 10px; color: black; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
 Netdown Summary Table
@@ -4881,8 +4882,8 @@ Provincial_Boundary
 <span id="cb5-287"><a href="#cb5-287" tabindex="-1"></a>    <span class="at">whiteSpace =</span> <span class="st">&quot;normal&quot;</span>,</span>
 <span id="cb5-288"><a href="#cb5-288" tabindex="-1"></a>    <span class="at">wordWrap =</span> <span class="st">&quot;break-word&quot;</span></span>
 <span id="cb5-289"><a href="#cb5-289" tabindex="-1"></a>  )</span></code></pre></div>
-<div class="datatables html-widget html-fill-item" id="htmlwidget-4259776557321d57ece4" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-4259776557321d57ece4">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41"],["2025-07-22","2025-07-21","2025-07-22","2024-10-30","2025-07-22","2025-07-22","2025-08-21","2025-07-22","2025-01-08","2025-08-19","2025-07-22","2025-07-31","2024-10-17","2025-07-22","2024-12-10","2025-07-22","2025-07-23","2025-08-16","2025-08-12","2025-08-12","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-07-22","2025-07-22","2025-07-22","2025-07-22","2024-10-01","2024-10-01","2024-10-01","2025-07-22","2024-06-07","2024-06-07","2025-07-22","2025-07-22","2025-07-22","2025-07-22"],["oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","gdb","oracle","oracle","gdb","gdb","gdb","gdb","oracle","oracle","sqlite","sqlite","gdb","oracle","oracle","oracle","oracle","oracle","gdb","oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","gpkg","csv","oracle","oracle","oracle","oracle"],["bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","s:\\for\\vic\\hts\\faib_data_for_distribution\\forest_harvesting_restrictions\\harvest_restrictions_august_2025\\published_version\\forest_harvesting_restrictions.gdb","bcgw","bcgw","w:\\for\\vic\\hts\\dam\\data\\vri\\tfl_integrated\\tfl_spatial_integration_2016_final3_deliveryv2.gdb","\\\\spatialfiles2.bcgov\\work\\for\\vic\\hts\\ana\\workarea\\provincial\\provincial.gdb","c:\\projects\\thlb_proxy\\data\\input\\veg_comp_lyr_r1_poly1_2016\\veg_comp_lyr_r1_poly.gdb","\\\\spatialfiles2.bcgov\\work\\for\\vic\\hts\\dam\\data\\vri\\vri2024\\internal_copy_not_for_distribution\\veg_comp_2024_lyr_r1_poly.gdb","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\final_gaps_current_noncurrent_lidar_treedPercent.sqlite","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\final_gaps_lidarProgam_contained_treedpercent.sqlite","\\\\spatialfiles2.bcgov\\archive\\FOR\\VIC\\HTS\\ANA\\workarea\\AR2024\\local_inputs\\BC_CE_Integrated_Roads_2024_with_buffers.gdb","bcgw","bcgw","bcgw","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\ANA\\Workarea\\PROVINCIAL\\provincial.gdb","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\fish_passage_lines.gpkg","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\fwa_stream_networks_channel_width.csv","bcgw","bcgw","bcgw","bcgw"],["whse_admin_boundaries.adm_nr_districts_sp","whse_admin_boundaries.adm_nr_regions_sp","whse_forest_vegetation.bec_biogeoclimatic_poly","whse_basemapping.btm_present_land_use_v1_svw","whse_forest_vegetation.f_own","whse_admin_boundaries.fadm_tfl_all_sp","whse_forest_tenure.ften_managed_licence_poly_svw","whse_admin_boundaries.adm_nr_areas_spg","whse_archaeology.raad_tfm_sites_svw","forest_harvesting_restrictions","whse_forest_vegetation.rslt_forest_cover_reserve_svw","whse_tantalis.ta_park_ecores_pa_svw","tfl_integratedv12_finalv3a","tsa_boundaries_2020","veg_comp_lyr_r1_poly","veg_comp_lyr_r1_poly","whse_forest_vegetation.veg_consolidated_cut_blocks_sp","whse_wildlife_management.wcp_wildlife_habitat_area_poly","gaps_current_noncurrent_lidar_treedpercent","gaps_lidarprogam_contained_treedpercent","integratedRoadsBuffers","WHSE_BASEMAPPING.GBA_RAILWAY_TRACKS_SP","WHSE_BASEMAPPING.GBA_TRANSMISSION_LINES_SP","WHSE_IMAGERY_AND_BASE_MAPS.DRP_OIL_GAS_PIPELINES_BC_SP","WHSE_MINERAL_TENURE.OG_PIPELINE_AREA_PERMIT_SP","WHSE_TANTALIS.TA_CROWN_RIGHTS_OF_WAY_SVW","tsa_boundaries_2020","WHSE_FOREST_VEGETATION.RSLT_OPENING_SVW","WHSE_FOREST_VEGETATION.RSLT_FOREST_COVER_INV_SVW","WHSE_FOREST_VEGETATION.bec_biogeoclimatic_poly","WHSE_BASEMAPPING.CWB_FLOODPLAINS_BC_AREA_SP","WHSE_BASEMAPPING.FWA_RIVERS_POLY","WHSE_BASEMAPPING.FWA_LAKES_POLY","WHSE_BASEMAPPING.FWA_WETLANDS_POLY","WHSE_BASEMAPPING.WLS_COMMUNITY_WS_PUB_SVW","modelled_habitat_potential","fwa_stream_networks_channel_width","WHSE_TERRESTRIAL_ECOLOGY.STE_TER_ATTRIBUTE_POLYS_SVW","WHSE_FOREST_VEGETATION.VEG_CONSOLIDATED_CUT_BLOCKS_SP","WHSE_FOREST_TENURE.FTEN_MANAGED_LICENCE_POLY_SVW","WHSE_ADMIN_BOUNDARIES.FADM_TFL_ALL_SP"],["whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector"],["adm_nr_districts_sp","adm_nr_regions_sp","bec_biogeoclimatic_poly","btm_present_land_use_v1_svw","f_own","fadm_tfl_all_sp","ften_managed_licence_poly_svw","north_south_coast","raad_tfm_sites_svw","rr_restriction","rslt_forest_cover_reserve_svw","ta_park_ecores_pa_svw","tfl_integrated2016","tsa_boundaries","veg_comp_lyr_r1_poly_2016","veg_comp_lyr_r1_poly_internal","veg_consolidated_cut_blocks_sp","wcp_wildlife_habitat_area_poly","gaps_current_noncurrent_lidar_treedpercent","gaps_lidarprogam_contained_treedpercent","integratedRoadsBuffers","gba_railway_tracks_sp","gba_transmission_lines_sp","drp_oil_gas_pipelines_bc_sp","og_pipeline_area_permit_sp","ta_crown_rights_of_way_svw","tsa_boundaries_2020","rslt_opening_svw","rslt_forest_cover_inv_svw","bec_biogeoclimatic_poly","cwb_floodplains_bc_area_sp","fwa_rivers_poly","fwa_lakes_poly","fwa_wetlands_poly","wls_community_ws_pub_svw","modelled_habitat_potential","modelled_habitat_potential","ste_ter_attribute_polys_svw","veg_consolidated_cut_blocks_sp","ften_managed_licence_poly_svw","fadm_tfl_all_sp"],["","","","","",""," (Retirement_Date is Null or RETIREMENT_DATE &gt; CURRENT_DATE) and FILE_STATUS_CODE = 'HI'","","","","","","","","","","","timber_harvest_code IN ('NO HARVEST ZONE', 'NO HARVEST')","","","","","","","","","","","","","","","","","","","","slope_stability_class_txt IN ('Potentially unstable', 'Potentially unstable after road building', 'Unstable')","","(Retirement_Date is Null or RETIREMENT_DATE &gt; CURRENT_DATE) and FILE_STATUS_CODE = 'HI'",""],["For management unit table creation","","","","","For management unit table creation","For management unit table creation","For management unit table creation","","","","","","For management unit table creation","Downloaded 2016 from: https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2022-","","","","Provided by FAIB inventory lidar specialist","Provided by FAIB inventory lidar specialist","","","","","","","","","","","","","","","","Obtained from BC Fish Passage project lead","Obtained from BC Fish Passage project lead","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>import_date<\/th>\n      <th>src_type<\/th>\n      <th>src_path<\/th>\n      <th>src_lyr<\/th>\n      <th>dst_schema<\/th>\n      <th>dst_tbl<\/th>\n      <th>query<\/th>\n      <th>notes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"columnDefs":[{"width":"300px","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"import_date","targets":1},{"name":"src_type","targets":2},{"name":"src_path","targets":3},{"name":"src_lyr","targets":4},{"name":"dst_schema","targets":5},{"name":"dst_tbl","targets":6},{"name":"query","targets":7},{"name":"notes","targets":8}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'white-space':'normal','word-wrap':'break-word'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-780beced525321b4743b" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-780beced525321b4743b">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41"],["2025-07-22","2025-07-21","2025-07-22","2024-10-30","2025-07-22","2025-07-22","2025-08-21","2025-07-22","2025-01-08","2025-08-19","2025-07-22","2025-07-31","2024-10-17","2025-07-22","2024-12-10","2025-07-22","2025-07-23","2025-08-16","2025-08-12","2025-08-12","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-08-20","2025-07-22","2025-07-22","2025-07-22","2025-07-22","2024-10-01","2024-10-01","2024-10-01","2025-07-22","2024-06-07","2024-06-07","2025-07-22","2025-07-22","2025-07-22","2025-07-22"],["oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","gdb","oracle","oracle","gdb","gdb","gdb","gdb","oracle","oracle","sqlite","sqlite","gdb","oracle","oracle","oracle","oracle","oracle","gdb","oracle","oracle","oracle","oracle","oracle","oracle","oracle","oracle","gpkg","csv","oracle","oracle","oracle","oracle"],["bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","s:\\for\\vic\\hts\\faib_data_for_distribution\\forest_harvesting_restrictions\\harvest_restrictions_august_2025\\published_version\\forest_harvesting_restrictions.gdb","bcgw","bcgw","w:\\for\\vic\\hts\\dam\\data\\vri\\tfl_integrated\\tfl_spatial_integration_2016_final3_deliveryv2.gdb","\\\\spatialfiles2.bcgov\\work\\for\\vic\\hts\\ana\\workarea\\provincial\\provincial.gdb","c:\\projects\\thlb_proxy\\data\\input\\veg_comp_lyr_r1_poly1_2016\\veg_comp_lyr_r1_poly.gdb","\\\\spatialfiles2.bcgov\\work\\for\\vic\\hts\\dam\\data\\vri\\vri2024\\internal_copy_not_for_distribution\\veg_comp_2024_lyr_r1_poly.gdb","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\final_gaps_current_noncurrent_lidar_treedPercent.sqlite","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\final_gaps_lidarProgam_contained_treedpercent.sqlite","\\\\spatialfiles2.bcgov\\archive\\FOR\\VIC\\HTS\\ANA\\workarea\\AR2024\\local_inputs\\BC_CE_Integrated_Roads_2024_with_buffers.gdb","bcgw","bcgw","bcgw","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\ANA\\Workarea\\PROVINCIAL\\provincial.gdb","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","bcgw","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\fish_passage_lines.gpkg","\\\\spatialfiles2.bcgov\\work\\FOR\\VIC\\HTS\\DAM\\Staff_WorkArea\\heckstrand\\thlb_proxy\\local_inputs\\fwa_stream_networks_channel_width.csv","bcgw","bcgw","bcgw","bcgw"],["whse_admin_boundaries.adm_nr_districts_sp","whse_admin_boundaries.adm_nr_regions_sp","whse_forest_vegetation.bec_biogeoclimatic_poly","whse_basemapping.btm_present_land_use_v1_svw","whse_forest_vegetation.f_own","whse_admin_boundaries.fadm_tfl_all_sp","whse_forest_tenure.ften_managed_licence_poly_svw","whse_admin_boundaries.adm_nr_areas_spg","whse_archaeology.raad_tfm_sites_svw","forest_harvesting_restrictions","whse_forest_vegetation.rslt_forest_cover_reserve_svw","whse_tantalis.ta_park_ecores_pa_svw","tfl_integratedv12_finalv3a","tsa_boundaries_2020","veg_comp_lyr_r1_poly","veg_comp_lyr_r1_poly","whse_forest_vegetation.veg_consolidated_cut_blocks_sp","whse_wildlife_management.wcp_wildlife_habitat_area_poly","gaps_current_noncurrent_lidar_treedpercent","gaps_lidarprogam_contained_treedpercent","integratedRoadsBuffers","WHSE_BASEMAPPING.GBA_RAILWAY_TRACKS_SP","WHSE_BASEMAPPING.GBA_TRANSMISSION_LINES_SP","WHSE_IMAGERY_AND_BASE_MAPS.DRP_OIL_GAS_PIPELINES_BC_SP","WHSE_MINERAL_TENURE.OG_PIPELINE_AREA_PERMIT_SP","WHSE_TANTALIS.TA_CROWN_RIGHTS_OF_WAY_SVW","tsa_boundaries_2020","WHSE_FOREST_VEGETATION.RSLT_OPENING_SVW","WHSE_FOREST_VEGETATION.RSLT_FOREST_COVER_INV_SVW","WHSE_FOREST_VEGETATION.bec_biogeoclimatic_poly","WHSE_BASEMAPPING.CWB_FLOODPLAINS_BC_AREA_SP","WHSE_BASEMAPPING.FWA_RIVERS_POLY","WHSE_BASEMAPPING.FWA_LAKES_POLY","WHSE_BASEMAPPING.FWA_WETLANDS_POLY","WHSE_BASEMAPPING.WLS_COMMUNITY_WS_PUB_SVW","modelled_habitat_potential","fwa_stream_networks_channel_width","WHSE_TERRESTRIAL_ECOLOGY.STE_TER_ATTRIBUTE_POLYS_SVW","WHSE_FOREST_VEGETATION.VEG_CONSOLIDATED_CUT_BLOCKS_SP","WHSE_FOREST_TENURE.FTEN_MANAGED_LICENCE_POLY_SVW","WHSE_ADMIN_BOUNDARIES.FADM_TFL_ALL_SP"],["whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector","whse_vector"],["adm_nr_districts_sp","adm_nr_regions_sp","bec_biogeoclimatic_poly","btm_present_land_use_v1_svw","f_own","fadm_tfl_all_sp","ften_managed_licence_poly_svw","north_south_coast","raad_tfm_sites_svw","rr_restriction","rslt_forest_cover_reserve_svw","ta_park_ecores_pa_svw","tfl_integrated2016","tsa_boundaries","veg_comp_lyr_r1_poly_2016","veg_comp_lyr_r1_poly_internal","veg_consolidated_cut_blocks_sp","wcp_wildlife_habitat_area_poly","gaps_current_noncurrent_lidar_treedpercent","gaps_lidarprogam_contained_treedpercent","integratedRoadsBuffers","gba_railway_tracks_sp","gba_transmission_lines_sp","drp_oil_gas_pipelines_bc_sp","og_pipeline_area_permit_sp","ta_crown_rights_of_way_svw","tsa_boundaries_2020","rslt_opening_svw","rslt_forest_cover_inv_svw","bec_biogeoclimatic_poly","cwb_floodplains_bc_area_sp","fwa_rivers_poly","fwa_lakes_poly","fwa_wetlands_poly","wls_community_ws_pub_svw","modelled_habitat_potential","modelled_habitat_potential","ste_ter_attribute_polys_svw","veg_consolidated_cut_blocks_sp","ften_managed_licence_poly_svw","fadm_tfl_all_sp"],["","","","","",""," (Retirement_Date is Null or RETIREMENT_DATE &gt; CURRENT_DATE) and FILE_STATUS_CODE = 'HI'","","","","","","","","","","","timber_harvest_code IN ('NO HARVEST ZONE', 'NO HARVEST')","","","","","","","","","","","","","","","","","","","","slope_stability_class_txt IN ('Potentially unstable', 'Potentially unstable after road building', 'Unstable')","","(Retirement_Date is Null or RETIREMENT_DATE &gt; CURRENT_DATE) and FILE_STATUS_CODE = 'HI'",""],["For management unit table creation","","","","","For management unit table creation","For management unit table creation","For management unit table creation","","","","","","For management unit table creation","Downloaded 2016 from: https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2022-","","","","Provided by FAIB inventory lidar specialist","Provided by FAIB inventory lidar specialist","","","","","","","","","","","","","","","","Obtained from BC Fish Passage project lead","Obtained from BC Fish Passage project lead","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>import_date<\/th>\n      <th>src_type<\/th>\n      <th>src_path<\/th>\n      <th>src_lyr<\/th>\n      <th>dst_schema<\/th>\n      <th>dst_tbl<\/th>\n      <th>query<\/th>\n      <th>notes<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"columnDefs":[{"width":"300px","targets":2},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"import_date","targets":1},{"name":"src_type","targets":2},{"name":"src_path","targets":3},{"name":"src_lyr","targets":4},{"name":"dst_schema","targets":5},{"name":"dst_tbl","targets":6},{"name":"query","targets":7},{"name":"notes","targets":8}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'white-space':'normal','word-wrap':'break-word'});\n}"}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
 </div>
 </div>
 <div id="delineating-the-fmlb" class="section level2">
@@ -8322,7 +8323,7 @@ WHSE_ARCHAEOLOGY.RAAD_TFM_SITES_SVW Access date: Jan 7, 2025</p>
 <p>No pre-processing was performed for this netdown factor. The layer
 was imported using the dadmtools:</p>
 <pre><code>src\analysis\0.setup-and-import-data-sources.R</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Non-Cultural_Heritage_Features&quot;</span></span>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Cultural_Heritage_Sites&quot;</span></span>
 <span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>n_step<span class="ot">&lt;-</span><span class="st">&quot;n10_arch&quot;</span></span>
 <span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a></span>
 <span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>netdown_summary<span class="ot">&lt;-</span><span class="fu">netdown100pct</span>(netdown_tab,netdown_summary,running_total,lclass,n_step)</span>
@@ -8619,7 +8620,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -8958,7 +8959,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -9157,7 +9158,7 @@ in the analysis.]
 <span id="cb34-110"><a href="#cb34-110" tabindex="-1"></a>      <span class="at">caption =</span>  <span class="st">&quot;Physically Inoperable Thresholds Used&quot;</span> ) <span class="sc">%&gt;%</span> </span>
 <span id="cb34-111"><a href="#cb34-111" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="st">&quot;striped&quot;</span>,</span>
 <span id="cb34-112"><a href="#cb34-112" tabindex="-1"></a>                <span class="at">font_size =</span> <span class="dv">10</span>)</span></code></pre></div>
-<table class="table table-striped" style="font-size: 10px; color: black; margin-left: auto; margin-right: auto;">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
 Physically Inoperable Thresholds Used
 </caption>
@@ -10727,7 +10728,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -11763,7 +11764,7 @@ src\analysis\2.merchantability-processing.R
 src\analysis\3.merchantability-classification.R</code></pre>
 <div id="non-merchantable-areas-summary" class="section level4">
 <h4>Non-Merchantable Areas Summary</h4>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Non-Merchantable&quot;</span></span>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Non_Merchantable&quot;</span></span>
 <span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a>n_step<span class="ot">&lt;-</span><span class="st">&quot;n13_non_merchantable&quot;</span></span>
 <span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a></span>
 <span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a>netdown_tab <span class="ot">&lt;-</span> netdown_tab <span class="sc">%&gt;%</span></span>
@@ -12066,7 +12067,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -12126,7 +12127,7 @@ Physical_Inoperable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Merchantable
+Non_Merchantable
 </td>
 <td style="text-align:right;">
 22,861,751
@@ -12252,7 +12253,7 @@ src\analysis\2.non-commercial-species-processing.R
 src\analysis\3.non-commercial-species-classification.R</code></pre>
 <div id="non-commercial-species-summary" class="section level4">
 <h4>Non-Commercial Species Summary</h4>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Non-Commercial&quot;</span></span>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Non_Commercial&quot;</span></span>
 <span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>n_step<span class="ot">&lt;-</span><span class="st">&quot;n14_non_commercial&quot;</span></span>
 <span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a></span>
 <span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a>netdown_tab <span class="ot">&lt;-</span> netdown_tab <span class="sc">%&gt;%</span></span>
@@ -12556,7 +12557,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -12616,7 +12617,7 @@ Physical_Inoperable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Merchantable
+Non_Merchantable
 </td>
 <td style="text-align:right;">
 22,861,751
@@ -12636,7 +12637,7 @@ Non-Merchantable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Commercial
+Non_Commercial
 </td>
 <td style="text-align:right;">
 6,241,057
@@ -14330,7 +14331,7 @@ Fort Nelson TSA
 <span id="cb50-6"><a href="#cb50-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb50-7"><a href="#cb50-7" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">p15_future_retention =</span> adjusted_retention)</span>
 <span id="cb50-8"><a href="#cb50-8" tabindex="-1"></a></span>
-<span id="cb50-9"><a href="#cb50-9" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Future Retention&quot;</span></span>
+<span id="cb50-9"><a href="#cb50-9" tabindex="-1"></a>lclass<span class="ot">&lt;-</span><span class="st">&quot;Future_Retention&quot;</span></span>
 <span id="cb50-10"><a href="#cb50-10" tabindex="-1"></a>n_step<span class="ot">&lt;-</span><span class="st">&quot;p15_future_retention&quot;</span></span>
 <span id="cb50-11"><a href="#cb50-11" tabindex="-1"></a></span>
 <span id="cb50-12"><a href="#cb50-12" tabindex="-1"></a></span>
@@ -14631,7 +14632,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -14691,7 +14692,7 @@ Physical_Inoperable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Merchantable
+Non_Merchantable
 </td>
 <td style="text-align:right;">
 22,861,751
@@ -14711,7 +14712,7 @@ Non-Merchantable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Commercial
+Non_Commercial
 </td>
 <td style="text-align:right;">
 6,241,057
@@ -14731,13 +14732,13 @@ Non-Commercial
 </tr>
 <tr>
 <td style="text-align:left;">
-Future Retention
+Future_Retention
 </td>
 <td style="text-align:right;">
-8,405,527
+94,790,480
 </td>
 <td style="text-align:right;">
-8.8674798
+100.0000000
 </td>
 <td style="text-align:right;">
 2,070,009.10
@@ -15049,7 +15050,7 @@ Riparian_Buffers
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Cultural_Heritage_Features
+Cultural_Heritage_Sites
 </td>
 <td style="text-align:right;">
 70,092
@@ -15109,7 +15110,7 @@ Physical_Inoperable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Merchantable
+Non_Merchantable
 </td>
 <td style="text-align:right;">
 22,861,751
@@ -15129,7 +15130,7 @@ Non-Merchantable
 </tr>
 <tr>
 <td style="text-align:left;">
-Non-Commercial
+Non_Commercial
 </td>
 <td style="text-align:right;">
 6,241,057
@@ -15149,13 +15150,13 @@ Non-Commercial
 </tr>
 <tr>
 <td style="text-align:left;">
-Future Retention
+Future_Retention
 </td>
 <td style="text-align:right;">
-8,405,527
+94,790,480
 </td>
 <td style="text-align:right;">
-8.8674798
+100.0000000
 </td>
 <td style="text-align:right;">
 2,070,009.10

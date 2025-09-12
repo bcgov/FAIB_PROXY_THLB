@@ -1,6 +1,6 @@
 ---
 title: "Provincial THLB Proxy Netdown"
-author: "Hailey Eckstrand"
+author: "FAIB Data Analysis and Data Management Team"
 date: "Last run on `r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -110,6 +110,7 @@ library(dplyr)
 library(knitr)
 library(kableExtra)
 library(tidyverse)
+library(keyring)
 source('../utils/functions.R')
 
 conn_list <- dadmtools::get_pg_conn_list()
@@ -1297,7 +1298,7 @@ src\analysis\0.setup-and-import-data-sources.R
 ```
 
 ```{r thlb_arch, eval= TRUE}
-lclass<-"Non-Cultural_Heritage_Features"
+lclass<-"Cultural_Heritage_Sites"
 n_step<-"n10_arch"
 
 netdown_summary<-netdown100pct(netdown_tab,netdown_summary,running_total,lclass,n_step)
@@ -1686,7 +1687,7 @@ src\analysis\3.merchantability-classification.R
 
 
 ```{r thlb_merch, eval= TRUE}
-lclass<-"Non-Merchantable"
+lclass<-"Non_Merchantable"
 n_step<-"n13_non_merchantable"
 
 netdown_tab <- netdown_tab %>%
@@ -1769,7 +1770,7 @@ src\analysis\3.non-commercial-species-classification.R
 
 
 ```{r thlb_noncom, eval= TRUE}
-lclass<-"Non-Commercial"
+lclass<-"Non_Commercial"
 n_step<-"n14_non_commercial"
 
 netdown_tab <- netdown_tab %>%
@@ -2114,7 +2115,7 @@ netdown_tab <- netdown_tab %>%
   ) %>%
   rename(p15_future_retention = adjusted_retention)
 
-lclass<-"Future Retention"
+lclass<-"Future_Retention"
 n_step<-"p15_future_retention"
 
 
@@ -2214,7 +2215,7 @@ JOIN harvest_netdown_adjustment adj USING (gr_skey);
 ```
  
  
-```{r aflb_to_pg, eval= TRUE}
+```{r aflb_to_pg, eval= FALSE}
 
 df_to_pg(Id(schema = 'whse', table = 'prov_netdown_temp'), netdown_tab[,c('gr_skey', 'fmlb', 'falb', 'aflb', 'thlb_net', 'p15_future_retention')], conn_list, overwrite=TRUE)
 
@@ -2222,7 +2223,7 @@ df_to_pg(Id(schema = 'whse', table = 'prov_netdown_temp'), netdown_tab[,c('gr_sk
 
 
 
-```{r aflb_to_pgs, eval= TRUE}
+```{r aflb_to_pgs, eval= FALSE}
 query <- "UPDATE whse.thlb_proxy_netdown set 
   fmlb = a.fmlb,
   falb = a.falb,
